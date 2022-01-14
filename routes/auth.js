@@ -1,9 +1,11 @@
 const router = require('express').Router();
 const User = require('../models/User');
-const {generatePassword,validatePassword} = require('../utils/passwordUtils')
+const {generatePassword,validatePassword} = require('../utils/passwordUtils');
+const jwt = require('jsonwebtoken');
 router.post('/register', async (req,res) => {
-    const encryptedPassword = generatePassword(req.body.password).encry_password;
-    const salt = generatePassword(req.body.password).salt;
+    const saltHash = generatePassword(req.body.password);
+    const encryptedPassword = saltHash.encry_password;
+    const salt = saltHash.salt;
     const newUser = new User({
         username : req.body.username,
         email : req.body.email,
@@ -29,10 +31,16 @@ router.post('/login', async (req,res) => {
     try{
         const existingUser = await User.findOne({username : req.body.username});
         if(existingUser) {
+            const {password, ...others} = existingUser;
             if(validatePassword(req.body.password,existingUser.password,existingUser.salt)){
+                const accessToken = jwt.sign({
+                    id : existingUser._id,
+                    isAdmin : existingUser.isAdmin,
+                },process.env.JWT_SEC,{expiresIn : '3d'});
                 console.log('User logged in');
                 res.status(200).json({
                     message : "User successfully signed in",
+                    accessToken : accessToken
                 })
             } 
             else {
