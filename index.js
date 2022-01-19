@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
@@ -10,15 +11,15 @@ const orderRoutes = require('./routes/order');
 const stripeRoutes = require('./routes/stripe');
 dotenv.config();
 
-const port = 3000 || process.env.PORT;
-
+const port = 5555 || process.env.PORT;
+app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/users',userRoutes);
 app.use('/api/products',productRoutes);
 app.use('/api/carts',cartRoutes);
 app.use('/api/orders',orderRoutes);
-app.use('/api/stripe',stripeRoutes);
+app.use('/api/checkout',stripeRoutes);
 
 mongoose.connect(process.env.DB_USER)
     .then(() => {
