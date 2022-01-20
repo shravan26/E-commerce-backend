@@ -40,6 +40,7 @@ router.post('/login', async (req,res) => {
                 console.log('User logged in');
                 res.status(200).json({
                     message : "User successfully signed in",
+                    ...others,
                     accessToken : accessToken
                 })
             } 
